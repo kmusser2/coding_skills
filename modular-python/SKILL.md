@@ -94,9 +94,10 @@ class (a frozen data class, a named tuple), never a bare tuple, never a
 Each example is self-contained; none refers to a particular project or file.
 
 **An enum or a frozen data class (F4).**
-- `Status` is one of `queued`, `running`, `done` -- one value from a named set:
-  `Status` is an enumeration.
-- `Job(id=7, owner="ada", status=Status.queued)` is several named facts
+- `Status` is one of `QUEUED`, `RUNNING`, `DONE` -- one value from a named set:
+  `Status` is an enumeration. The member names are constants (N4); the values
+  are the wire strings (D1): `QUEUED = "queued"`.
+- `Job(id=7, owner="ada", status=Status.QUEUED)` is several named facts
   travelling together: `Job` is a frozen data class, and its `status` field is
   the enum.
 - `{"id": 7, "status": "queued"}` is the same claim with no owner -- a bare dict
