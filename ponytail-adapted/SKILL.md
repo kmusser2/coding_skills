@@ -15,10 +15,10 @@ metadata:
 # Ponytail (adapted) -- the lazy senior dev principles
 
 **Version:** 0.1 (draft).
-**Status:** portable guidance, maintained at the level of the harness and applied
-to projects -- it is not part of, and not the policy of, any project it happens to
-sit in. If you are reading it inside a project, it is a guest there: that
-project's own conventions take precedence.
+**Status:** Normative. Maintained at the level of the harness and binding on
+the project it is configured for, unless the user explicitly excludes this skill,
+or a named rule in it, in that project's AGENTS.md. Silence is not an
+exclusion.
 
 ## Sources
 
@@ -47,19 +47,21 @@ points are documents, and ponytail's "fewest files" does not reach them. Naming
 (`threading`) are unchanged by this skill and are not restated here (A1).
 
 **Force.** A statement marked **[M]** is mandatory; one marked **[G]** is
-guidance -- the family's default judgment, replaceable by the project's own
-judgment without ceremony. A rule's headline and its opening statement carry
+guidance -- the family's default judgment, replaceable by the user in the project's
+AGENTS.md without ceremony. A rule's headline and its opening statement carry
 the headline's tag; each bullet carries its own tag when it adds a norm.
 Unmarked text -- rationale, examples, and the *Test* questions -- binds
 nothing. A mandatory statement may not be overridden unilaterally by the
-agent applying it: only an explicit statement in the project owner's rules
-may except it (`modularity`, *Exceptions*). The decisions the ladder asks for
+agent applying it: only the user may exclude it -- an explicit exclusion in
+the project's AGENTS.md, or a waiver granted for a specific case and
+documented there (`modularity`, *Exclusions*, *Waivers*). The decisions the ladder asks for
 are judgment; the discipline of climbing it is mandatory.
 
-**Intensity.** A parameter, not a rule. *lite:* build what was asked, name the
-lazier alternative in one line. *full* (default): the ladder is enforced. *ultra:*
-YAGNI extremist -- deletion before addition, and the requirement itself gets
-challenged.
+**Intensity.** A parameter, not a rule. The level is the user's to set for a
+project, in that project's AGENTS.md; silence means *full*, the default.
+*lite:* build what was asked, name the lazier alternative in one line. *full*
+(default): the ladder is enforced. *ultra:* YAGNI extremist -- deletion before
+addition, and the requirement itself gets challenged.
 
 ## P. The principles
 
@@ -135,5 +137,6 @@ shape, custom cache if memory becomes the constraint`.
 - It restates no principle that `modularity` or its siblings own (A1): P6 asks
   for one minimal check per change; the E-rules govern test layout. P1--P6 say
   how much code; A/B/C/D/E/G/H say how the code you do build is shaped.
-- It is not any project's policy, and it does not override a project's own
-  conventions.
+- It does not override an explicit exclusion the user records in a project's
+  AGENTS.md; nothing less displaces its rules -- not a project's silence, and
+  not its differing conventions (`modularity`, *Precedence*).

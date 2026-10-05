@@ -14,13 +14,13 @@ metadata:
   version: "0.1"
 ---
 
-# Modular design -- portable guidance
+# Modular design -- portable rules
 
 **Version:** 0.1 (draft).
-**Status:** portable guidance, maintained at the level of the harness and applied
-to projects -- it is not part of, and not the policy of, any project it happens to
-sit in. If you are reading it inside a project, it is a guest there: that
-project's own conventions take precedence.
+**Status:** Normative. Maintained at the level of the harness and binding on
+the project it is configured for, unless the user explicitly excludes this skill,
+or a named rule in it, in that project's AGENTS.md. Silence is not an
+exclusion.
 
 **Scope.** Module decomposition in any language: ownership of facts and
 documentation, state and boundaries, values and errors, testing, interfaces,
@@ -34,9 +34,12 @@ not restate them (A1).
 
 ## How to apply this
 
-- **Precedence.** Where a project's own rules explicitly state an exception to
-  a mandatory statement (see *Exceptions*), the exception wins within its
-  stated scope. Where the project is silent, these rules are the default.
+- **Precedence.** These rules are normative and bind the project. The only thing that displaces them is an explicit exclusion by the
+  user in the project's AGENTS.md -- of this skill as a whole, or of a named
+  rule -- and the excluded skill or rule then does not apply to the project
+  at all (see *Exclusions*). A
+  project's own conventions do not displace them by themselves; silence is
+  not an exclusion.
 - **Scope of application.** These rules govern the code you are writing or
   editing. In a codebase that predates them they forbid *new* violations and
   authorize no repairs: never fix an existing violation as a side effect of
@@ -47,25 +50,37 @@ not restate them (A1).
 - **Principles travel; parameters do not.** Each rule below states a general
   claim. Its concrete expression -- naming style, thresholds, tooling -- is the
   project's to choose.
-- **Defer to the project's own rule owners.** Before changing behaviour a
-  project documents, find that document and follow it. This document cannot
-  index a project it has not seen.
+- **Defer to the project's own rule owners.** The user speaks for the project
+  in its AGENTS.md; follow what it says, and see *Exclusions* for what an
+  exclusion must look like. Before changing behaviour a project documents
+  elsewhere, find that document and follow it where these rules are silent.
+  This document cannot index a project it has not seen.
 - **Force.** A statement marked **[M]** is mandatory; one marked **[G]** is
-  guidance -- the family's default judgment, which a project may replace with
-  its own judgment without ceremony. A rule's headline and its opening
+  guidance -- the family's default judgment, which the user may replace in the project's
+  AGENTS.md without ceremony. A rule's headline and its opening
   statement carry the headline's tag; each bullet carries its own tag when it
   adds a norm, and a differing force is tagged where it appears. Unmarked text
   -- rationale, examples, consequences, and the *Test* questions -- explains
   and binds nothing.
-- **Exceptions.** A mandatory statement may not be overridden unilaterally by
-  the agent applying it. It binds unless the project owner's own rules
-  explicitly except it: the project document must name the rule id (or quote
-  the statement) and state the exception's scope. Silence is not an exception,
-  and neither is a general "our conventions differ". Code that predates the
-  rule is governed by *Scope of application* -- no new violations, no mandated
-  repairs. The family's own carveouts are part of the rule they appear in and
-  need no exception. A checker enforces mandatory statements only; guidance is
-  judgment.
+- **Exclusions.** A mandatory statement may not be overridden unilaterally by
+  the agent applying it. It binds unless the user excludes it, by one of two
+  ways, both the user's: a standing exclusion recorded in the project's
+  AGENTS.md -- the entry must name the rule id (or quote the statement), and
+  the named rule (or skill) then does not apply to the project at all -- or
+  a waiver granted for one specific case (*Waivers*). Silence is not an exclusion, and neither is a general "our
+  conventions differ". Code that predates the rule is governed by *Scope of
+  application* -- no new violations, no mandated repairs. The family's own
+  carveouts are part of the rule they appear in and need no exclusion. A
+  checker enforces mandatory statements only; guidance is judgment.
+- **Waivers.** If the agent has a strong case that a mandatory statement
+  should not apply to the case in front of it, it does not deviate: it makes
+  the case to the user and requests a waiver for that case. Only the user
+  grants it. Once granted, the agent documents it in the project's
+  AGENTS.md -- the rule id (or the statement) and the case's scope -- so that
+  AGENTS.md always remains the complete normative record; an undocumented
+  waiver is no waiver. A waiver covers the documented case alone and carries
+  to no other case. If the case recurs, widen the entry into a standing
+  exclusion (*Exclusions*) rather than accumulating waivers.
 
 Each rule ends with a test -- the question to ask of the code in front of you.
 
@@ -405,5 +420,6 @@ Each example is self-contained; none refers to a particular project or file.
 - It is not a formatting or naming-style guide.
 - It describes no tooling and ships no checker.
 - It authorizes no refactor, and no cleanup of code that predates it.
-- It is not any project's policy, and it does not override a project's own
-  conventions.
+- It does not override an explicit exclusion the user records in a project's
+  AGENTS.md; nothing less displaces its rules -- not a project's silence, and
+  not its differing conventions (see *Precedence*).

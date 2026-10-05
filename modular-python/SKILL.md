@@ -13,13 +13,13 @@ metadata:
   version: "0.1"
 ---
 
-# Python types and value shapes -- portable guidance
+# Python types and value shapes -- portable rules
 
 **Version:** 0.1 (draft).
-**Status:** portable guidance, maintained at the level of the harness and applied
-to projects -- it is not part of, and not the policy of, any project it happens to
-sit in. If you are reading it inside a project, it is a guest there: that
-project's own conventions take precedence.
+**Status:** Normative. Maintained at the level of the harness and binding on
+the project it is configured for, unless the user explicitly excludes this skill,
+or a named rule in it, in that project's AGENTS.md. Silence is not an
+exclusion.
 
 **Scope.** The Python expression of the modularity principles: how Python's
 typing states the contracts those principles require. The principles are
@@ -35,13 +35,14 @@ parameters do not" -- are stated in the companion skill `modularity` and apply
 here unchanged. Each rule ends with a *Test*.
 
 **Force.** A statement marked **[M]** is mandatory; one marked **[G]** is
-guidance -- the family's default judgment, replaceable by the project's own
-judgment without ceremony. A rule's headline and its opening statement carry
+guidance -- the family's default judgment, replaceable by the user in the project's
+AGENTS.md without ceremony. A rule's headline and its opening statement carry
 the headline's tag; each bullet carries its own tag when it adds a norm.
 Unmarked text -- rationale, examples, and the *Test* questions -- binds
 nothing. A mandatory statement may not be overridden unilaterally by the
-agent applying it: only an explicit statement in the project owner's rules
-may except it (`modularity`, *Exceptions*).
+agent applying it: only the user may exclude it -- an explicit exclusion in
+the project's AGENTS.md, or a waiver granted for a specific case and
+documented there (`modularity`, *Exclusions*, *Waivers*).
 
 ## F. Types
 
@@ -121,5 +122,6 @@ Each example is self-contained; none refers to a particular project or file.
 - It restates no principle that the `modularity` skill owns (A1).
 - It describes no tooling beyond the reference checker placeholder in
   `scripts/`; enforcement belongs to the project.
-- It is not any project's policy, and it does not override a project's own
-  conventions.
+- It does not override an explicit exclusion the user records in a project's
+  AGENTS.md; nothing less displaces its rules -- not a project's silence, and
+  not its differing conventions (`modularity`, *Precedence*).

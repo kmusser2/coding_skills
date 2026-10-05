@@ -13,13 +13,13 @@ metadata:
   version: "0.1"
 ---
 
-# Thread and concurrency design -- portable guidance
+# Thread and concurrency design -- portable rules
 
 **Version:** 0.1 (draft).
-**Status:** portable guidance, maintained at the level of the harness and applied
-to projects -- it is not part of, and not the policy of, any project it happens to
-sit in. If you are reading it inside a project, it is a guest there: that
-project's own conventions take precedence.
+**Status:** Normative. Maintained at the level of the harness and binding on
+the project it is configured for, unless the user explicitly excludes this skill,
+or a named rule in it, in that project's AGENTS.md. Silence is not an
+exclusion.
 
 **Scope.** In-process concurrency in any language: threads, event loops, and the
 boundaries between them. The rules state design claims; the library, primitive,
@@ -27,8 +27,11 @@ or language feature that expresses them is a parameter.
 
 ## How to apply this
 
-- **Precedence.** A project's own stated convention wins. Where the project is
-  silent, these rules are the default.
+- **Precedence.** These rules are normative and bind the project. The only thing that displaces them is an explicit exclusion by the
+  user in the project's AGENTS.md -- of this skill as a whole, or of a named
+  rule (C1--C5) -- and the excluded skill or rule then does not apply to the
+  project at all. Silence is not
+  an exclusion.
 - **Scope of application.** These rules govern the code you are writing or
   editing. In a codebase that predates them they forbid *new* violations and
   authorize no repairs: never fix an existing violation as a side effect of
@@ -99,5 +102,6 @@ no long computation. That is what the worker exists for.
 - It is not a style guide for any particular threading library or runtime.
 - It describes no tooling and ships no checker.
 - It authorizes no refactor, and no cleanup of code that predates it.
-- It is not any project's policy, and it does not override a project's own
-  conventions.
+- It does not override an explicit exclusion the user records in a project's
+  AGENTS.md; nothing less displaces its rules -- not a project's silence, and
+  not its differing conventions (see *Precedence*).
