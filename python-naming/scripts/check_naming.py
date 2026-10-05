@@ -1,3 +1,5 @@
+# Copyright (c) 2026 kmusser@idi-software.com
+# SPDX-License-Identifier: MIT
 # modularity: allow the docstring quotes the script name and usage; pattern text, not a location reference (A1)
 """check_naming.py -- reference checker for the python-naming skill.
 

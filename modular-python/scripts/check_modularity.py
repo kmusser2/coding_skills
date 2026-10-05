@@ -1,3 +1,5 @@
+# Copyright (c) 2026 kmusser@idi-software.com
+# SPDX-License-Identifier: MIT
 # modularity: allow the docstring quotes names and patterns to state the checker's contract; those are pattern texts, not location references (A1)
 """check_modularity.py -- reference checker for the modularity and
 modular-python skills.

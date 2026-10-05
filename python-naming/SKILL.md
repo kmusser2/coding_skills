@@ -4,10 +4,12 @@ description: >
   Python naming: PEP 8 compliance is required, plus the private spellings
   PEP 8 leaves unstated and the PEP 8 corners that are commonly missed --
   names whose constancy and visibility are readable in the name itself.
-license: Apache-2.0
+license: MIT
 compatibility: Requires Python 3.11+
 metadata:
   author: kmusser@idi-software.com
+  copyright: (c) 2026 kmusser@idi-software.com
+  acknowledgment: The author appreciates assistance from MiMo-V2.6-Pro and Deepseek-v4.1-Flash
   version: "0.1"
 ---
 

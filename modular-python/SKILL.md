@@ -4,10 +4,12 @@ description: >
   Python typing rules for modular design -- annotations, `Any`, generics,
   value shapes -- the Python expression of the language-independent modularity
   skill.
-license: Apache-2.0
+license: MIT
 compatibility: Requires Python 3.11+
 metadata:
   author: kmusser@idi-software.com
+  copyright: (c) 2026 kmusser@idi-software.com
+  acknowledgment: The author appreciates assistance from MiMo-V2.6-Pro and Deepseek-v4.1-Flash
   version: "0.1"
 ---
 

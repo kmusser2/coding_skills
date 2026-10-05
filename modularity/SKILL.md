@@ -5,10 +5,12 @@ description: >
   module boundaries, values and errors, testing, service and protocol
   interfaces, requirements decomposition -- for code bases that are robust to
   future requirements changes. Any language.
-license: Apache-2.0
+license: MIT
 compatibility: Any language
 metadata:
   author: kmusser@idi-software.com
+  copyright: (c) 2026 kmusser@idi-software.com
+  acknowledgment: The author appreciates assistance from MiMo-V2.6-Pro and Deepseek-v4.1-Flash
   version: "0.1"
 ---
 
