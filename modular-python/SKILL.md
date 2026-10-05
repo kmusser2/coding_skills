@@ -34,25 +34,34 @@ The family conventions -- precedence, scope of application, "principles travel,
 parameters do not" -- are stated in the companion skill `modularity` and apply
 here unchanged. Each rule ends with a *Test*.
 
+**Force.** A statement marked **[M]** is mandatory; one marked **[G]** is
+guidance -- the family's default judgment, replaceable by the project's own
+judgment without ceremony. A rule's headline and its opening statement carry
+the headline's tag; each bullet carries its own tag when it adds a norm.
+Unmarked text -- rationale, examples, and the *Test* questions -- binds
+nothing. A mandatory statement may not be overridden unilaterally by the
+agent applying it: only an explicit statement in the project owner's rules
+may except it (`modularity`, *Exceptions*).
+
 ## F. Types
 
-**F1. The public surface is annotated; the private surface may be.** Every public
+**F1. [M] The public surface is annotated; the private surface may be.** Every public
 function and method states the types of its parameters and of its return. A
 private function's annotations are its author's choice -- but if present, they
 obey the rules below like any other.
 - The annotation is part of the contract the public surface states (D3): it is
   what a caller can rely on, and what a checker can verify. An unannotated
   public parameter is an unstated contract.
-- An annotation that is present is a claim, and may not be looser than the code:
+- **[M]** An annotation that is present is a claim, and may not be looser than the code:
   no `Any` to silence a checker, no bare container to dodge a shape.
 - *Test:* can a caller know, without reading the body, what this function takes
   and returns?
 
-**F2. `Any` is prohibited; `object` is honest.** `Any` asserts "trust me": every
+**F2. [M] `Any` is prohibited; `object` is honest.** `Any` asserts "trust me": every
 operation on it succeeds, and the blindness spreads to everything derived from
 it. An `Any` annotation is, to a checker, no annotation at all -- and an `Any`
 return gives every caller nothing.
-- Where the type is genuinely unknown, annotate `object`: it says "I do not
+- **[M]** Where the type is genuinely unknown, annotate `object`: it says "I do not
   know", takes anything on input, and forces a narrowing before use. Mistakes
   fail loudly instead of silently.
 - **Carveout -- the dynamic seam.** `Any` is allowed where genuinely dynamic
@@ -66,21 +75,21 @@ return gives every caller nothing.
 - *Test:* if this annotation were deleted, would checking change at all? If not,
   it is decoration.
 
-**F3. A container names what it holds.** A bare `dict`, `list`, `set`, `tuple`,
+**F3. [M] A container names what it holds.** A bare `dict`, `list`, `set`, `tuple`,
 `Callable`, or `Iterable` is `dict[Any, Any]` in different clothes (F2).
 Parameterize every generic: `dict[str, User]`, `tuple[str, int]`,
 `Callable[[int], str]`.
-- If what the container holds cannot be named, the shape is not yet understood
+- **[G]** If what the container holds cannot be named, the shape is not yet understood
   -- or it is several shapes, and wants named fields (F4).
 - *Test:* does this annotation say what is inside?
 
-**F4. Values that travel have named fields.** A value passed or returned across
+**F4. [M] Values that travel have named fields.** A value passed or returned across
 a function or module boundary carries its meaning in field names -- a small
 class (a frozen data class, a named tuple), never a bare tuple, never a
 `dict[str, Any]`, never a positional pair whose order every caller must remember.
 - Named fields make the call site read (`order.total` instead of `order[3]`),
   make renames findable, and give the value's documentation one home (A2).
-- A **frozen data class** is several named facts travelling together. An
+- **[M]** A **frozen data class** is several named facts travelling together. An
   **enumeration** is one value drawn from a named set (D1). The shape follows
   the claim: one-of-a-set is an enum, several-named-values is a class. An enum
   whose members each carry data is usually a class; a class whose fields are all

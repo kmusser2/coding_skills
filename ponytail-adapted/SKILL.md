@@ -46,6 +46,16 @@ points are documents, and ponytail's "fewest files" does not reach them. Naming
 (N1--N4), modularity (A/B/C/D/E/G/H), typing (`modular-python`) and concurrency
 (`threading`) are unchanged by this skill and are not restated here (A1).
 
+**Force.** A statement marked **[M]** is mandatory; one marked **[G]** is
+guidance -- the family's default judgment, replaceable by the project's own
+judgment without ceremony. A rule's headline and its opening statement carry
+the headline's tag; each bullet carries its own tag when it adds a norm.
+Unmarked text -- rationale, examples, and the *Test* questions -- binds
+nothing. A mandatory statement may not be overridden unilaterally by the
+agent applying it: only an explicit statement in the project owner's rules
+may except it (`modularity`, *Exceptions*). The decisions the ladder asks for
+are judgment; the discipline of climbing it is mandatory.
+
 **Intensity.** A parameter, not a rule. *lite:* build what was asked, name the
 lazier alternative in one line. *full* (default): the ladder is enforced. *ultra:*
 YAGNI extremist -- deletion before addition, and the requirement itself gets
@@ -53,7 +63,7 @@ challenged.
 
 ## P. The principles
 
-**P1. Climb the ladder; stop at the first rung that holds.** Before writing
+**P1. [M] Climb the ladder; stop at the first rung that holds.** Before writing
 code, understand the problem: read the task and the code it touches, and trace
 the real flow end to end. Then climb, stopping at the first rung that solves it:
 1. Does this need to exist at all? A speculative need is skipped, and the skip
@@ -66,19 +76,19 @@ the real flow end to end. Then climb, stopping at the first rung that solves it:
    few lines.
 6. Can it be one line?
 7. Only now: the minimum code that works.
-- Two rungs would hold? Take the higher one.
+- **[M]** Two rungs would hold? Take the higher one.
 - *Test:* which rung stopped you -- and did you climb only after tracing the
   real flow?
 
-**P2. Fix the root cause, not the symptom.** A report names a symptom. Grep
+**P2. [M] Fix the root cause, not the symptom.** A report names a symptom. Grep
 every caller of the function you are about to touch, and fix the shared
 function once: one guard in the shared function beats one per caller, and
 patching only the named path leaves the siblings broken.
 - *Test:* when this bug recurs from the sibling path, is the fix already there?
 
-**P3. Deletion over addition.** No unrequested abstractions: no interface with
+**P3. [M] Deletion over addition.** No unrequested abstractions: no interface with
 one implementation, no factory for one product, no configuration for a constant.
-No boilerplate or scaffolding "for later". Boring over clever. Fewest files
+No boilerplate or scaffolding "for later". **[G]** Boring over clever. Fewest files
 possible (subject to the Family note re H1). The shortest working diff wins --
 but only after understanding: the smallest change in the wrong place is a
 second bug. A complex request gets the lazy version shipped *and* questioned in
@@ -87,7 +97,7 @@ an answer you can default. Two standard-library options of the same size? Take
 the edge-case-correct one: lazy means less code, not a flimsier algorithm.
 - *Test:* what did you not build, and what is the trigger to build it?
 
-**P4. Never lazy about understanding; never lazy about safety.** Never simplify
+**P4. [M] Never lazy about understanding; never lazy about safety.** Never simplify
 away input validation at trust boundaries, error handling that prevents data
 loss, security, accessibility, or anything explicitly requested -- if the user
 insists, build it; do not re-argue. Never lazy about comprehension either:
@@ -95,12 +105,12 @@ trace every file the change touches first. And the physical world is not lazy
 -- real clocks drift, sensors read off -- so leave the calibration knob.
 - *Test:* what does this simplification stop being true at?
 
-**P5. Deliberate simplifications are marked.** A `ponytail:` comment names both
+**P5. [M] Deliberate simplifications are marked.** A `ponytail:` comment names both
 the ceiling and the upgrade path:
 - `# ponytail: global lock, per-account locks if throughput matters`
 - *Test:* does the comment name both the ceiling and the upgrade path?
 
-**P6. Non-trivial logic leaves one runnable check.** Any branch, loop, parser,
+**P6. [M] Non-trivial logic leaves one runnable check.** Any branch, loop, parser,
 or money/security path leaves behind ONE smallest failing-if-broken check: an
 assert-based `demo()`/`__main__` self-check, or one `test_*.py`. No frameworks,
 no fixtures, no per-function suites unless asked. Trivial one-liners need no

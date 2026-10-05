@@ -39,9 +39,18 @@ The family conventions -- precedence, scope of application, "principles travel,
 parameters do not" -- are stated in the companion skill `modularity` and apply
 here unchanged. Each rule ends with a *Test*.
 
+**Force.** A statement marked **[M]** is mandatory; one marked **[G]** is
+guidance -- the family's default judgment, replaceable by the project's own
+judgment without ceremony. A rule's headline and its opening statement carry
+the headline's tag; each bullet carries its own tag when it adds a norm.
+Unmarked text -- rationale, examples, and the *Test* questions -- binds
+nothing. A mandatory statement may not be overridden unilaterally by the
+agent applying it: only an explicit statement in the project owner's rules
+may except it (`modularity`, *Exceptions*).
+
 ## N. Naming
 
-**N1. Naming follows PEP 8.** The spellings PEP 8 gives for Python names bind
+**N1. [M] Naming follows PEP 8.** The spellings PEP 8 gives for Python names bind
 this family: snake_case for functions, methods, variables and parameters,
 CamelCase for classes, ALL_CAPS for constants.
 - PEP 8 hedges -- "normally", "usually", "consistency within a project is more
@@ -52,7 +61,7 @@ CamelCase for classes, ALL_CAPS for constants.
 - *Test:* does this name carry the PEP 8 spelling for what it is -- and does
   the spelling match what the name claims?
 
-**N2. The underscore composes with every spelling.** PEP 8 gives the leading
+**N2. [M] The underscore composes with every spelling.** PEP 8 gives the leading
 underscore as a weak "internal use" marker, and gives each kind its spelling,
 as separate conventions. This family binds both and states the composition:
 `_ALL_CAPS` for a private constant, `_CamelCase` for a private class or enum,
@@ -64,41 +73,41 @@ as separate conventions. This family binds both and states the composition:
 - *Test:* does the underscore match who actually reads, calls, or names this?
   If another module does, the name lies (B3).
 
-**N3. The PEP 8 corners that get missed.** PEP 8 owns every claim below (A1).
+**N3. [M] The PEP 8 corners that get missed.** PEP 8 owns every claim below (A1).
 They are repeated because they are routinely got wrong, and a pointer does not
 help a reader who never follows it; where this list and PEP 8 disagree, PEP 8
 is right. This list is an index, not a second owner.
-- Type variables take short CapWords, preferring one letter -- `T`, `AnyStr`,
+- **[M]** Type variables take short CapWords, preferring one letter -- `T`, `AnyStr`,
   `Proto`-suffixed where a protocol bound is meant -- never `t`, never
   `value_type`.
-- An exception class ends in `Error`: `class ParseError(Exception)` -- and is
+- **[M]** An exception class ends in `Error`: `class ParseError(Exception)` -- and is
   CamelCase like any class.
-- A name that would collide with a keyword takes a trailing underscore:
+- **[M]** A name that would collide with a keyword takes a trailing underscore:
   `class_`, `type_` -- never `klass`, never `type1`.
 - `__double_leading` is name mangling, not stronger privacy: the language
   rewrites it to `_Class__name` to dodge subclass collisions. Privacy is one
   underscore, and B3 says what it means.
-- `__dunder__` names are the language's reserved spelling for its own
+- **[M]** `__dunder__` names are the language's reserved spelling for its own
   protocols. Never invent one; there is no safe second meaning.
-- The single-character names `l`, `O` and `I` are banned: they are not readable
+- **[M]** The single-character names `l`, `O` and `I` are banned: they are not readable
   at a glance (`l` and `1`, `O` and `0`).
-- Module names are short and all-lowercase; underscores where they improve
-  readability (`xml_reader`, `xmlreader` -- both fine). A **public** package
-  name is short, all-lowercase and carries **no** underscores (`xmltools`,
-  `netcode`): PEP 8 only discourages them there -- this family prohibits them.
-  A **private** package keeps the underscore marker and may separate words
-  (`_internal_tools`, `_model_v2`). Never CapWords.
-- Undocumented names are internal (PEP 8, "Public and Internal Interfaces") --
+- **[M]** Module names are short and all-lowercase; **[G]** underscores where
+  they improve readability (`xml_reader`, `xmlreader` -- both fine). **[M]** A
+  **public** package name is short, all-lowercase and carries **no** underscores
+  (`xmltools`, `netcode`): PEP 8 only discourages them there -- this family
+  prohibits them. A **private** package keeps the underscore marker and may
+  separate words (`_internal_tools`, `_model_v2`). **[M]** Never CapWords.
+- **[M]** Undocumented names are internal (PEP 8, "Public and Internal Interfaces") --
   which is D3's claim, and why `__all__` states the surface.
 - *Test:* for a name in this list's territory, is this the PEP 8 spelling --
   and did the answer come without opening PEP 8?
 
-**N4. An enum member is ALL_CAPS.** An enum member is a constant scoped to its
+**N4. [M] An enum member is ALL_CAPS.** An enum member is a constant scoped to its
 class, and takes the constant spelling (N1). PEP 8 does not name enum members at
 all -- this rule is additive, not a restatement.
 - `class Status(StrEnum): QUEUED = "queued"` -- the name is the constant's
   spelling, the value is the wire form (D1). Both are stated.
-- A member the language defines (`_missing_`, `_generate_next_value_`,
+- **[M]** A member the language defines (`_missing_`, `_generate_next_value_`,
   `_ignore_`) is spelled as the language spells it.
 - *Test:* would this member be a constant at module scope? Then it takes the
   constant's spelling.
