@@ -7,6 +7,9 @@
         "python-naming/SKILL.md"
     ],
     "tools": [
-        "toolkit/python.py"
+        {
+            "path": "toolkit/python/",
+            "files": ["__init__.py","check_modularity.py","check_naming.py"]
+        }
     ]
 }

@@ -3,7 +3,7 @@
 # keywords: |python|modularity|naming|check|rules|enforce|style|compliance|skill|
 # examples: |import python; python.check_modularity()|import python; python.check_naming('src')|import python; python.plan()|
 # modularity: allow the docstring names the module and states output patterns to give the tool's contract; those are names and pattern texts, not location references (A1)
-"""python.py - enforce the Python coding skills: modularity and naming.
+"""python.py - enforce the modularity and naming coding skills
 
 Python API (importable from any python_eval call):
   import python
@@ -22,7 +22,7 @@ Suppression: `# modularity: allow <reason>` on the flagged line or the line
 above; the reason is mandatory.
 
 CLI:
-  python python.py --selftest      # contract and smoke tests for this tool
+  python toolkit/python/__init__.py --selftest   # contract and smoke tests for this tool
 """
 
 __all__ = ["VERSION", "Finding", "RuleTable", "Plan", "check_modularity",
