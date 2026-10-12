@@ -8,8 +8,12 @@
     ],
     "tools": [
         {
-            "path": "toolkit/python/",
-            "files": ["__init__.py","check_modularity.py","check_naming.py"]
+            "init": "toolkit/python/__init__.py",
+            "files": [
+                "toolkit/python/__init__.py",
+                "toolkit/python/check_modularity.py",
+                "toolkit/python/check_naming.py"],
+            "root": true
         }
     ]
 }
