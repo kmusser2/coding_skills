@@ -2,15 +2,15 @@
 # SPDX-License-Identifier: MIT
 # modularity: allow the docstring quotes names and patterns to state the checker's contract; those are pattern texts, not location references (A1)
 """check_modularity.py -- reference checker for the modularity and
-modular-python skills.
+python-modularity skills.
 
 STATUS: Tier 1 implemented; Tier 2 and Tier 3 remain planned (see the tables
 below). The principles are still settling, so implementations land per tier.
 
 Purpose
 -------
-Mechanically check the family rules (modularity/SKILL.md and the local
-SKILL.md) that are marked machine-checkable, so compliance is a tool's verdict
+Mechanically check the family rules (modularity/SKILL.md and
+python-modularity/SKILL.md) that are marked machine-checkable, so compliance is a tool's verdict
 rather than a reviewer's judgement: "mechanical rules are checked, not
 reasoned about".
 
@@ -43,11 +43,11 @@ Scope notes for Tier 1:
 
 Usage:
 
-    python scripts/check_modularity.py [path ...]     # default: current dir
-    python scripts/check_modularity.py --plan         # print the tier tables
+    python TOOLKIT/check_modularity.py [path ...]     # default: current dir
+    python TOOLKIT/check_modularity.py --plan         # print the tier tables
 """
 
-__all__ = ["TIER1_CHECKS", "TIER2_CHECKS", "JUDGEMENT_RULES", "main"]
+__all__ = ["TIER1_CHECKS", "TIER2_CHECKS", "JUDGEMENT_RULES", "Finding", "run", "main"]
 
 import argparse
 import ast
@@ -55,7 +55,7 @@ import os
 import re
 import sys
 import tokenize
-from typing import NamedTuple
+from typing import NamedTuple, Sequence
 
 TIER1_CHECKS: tuple[tuple[str, str], ...] = (
     ("B1", "module-scope state: mutable literal bindings, `global`, `globals()`"),
@@ -134,7 +134,7 @@ _URL_RE = re.compile(r"\S*://\S+")
 _TEST_FILE_RE = re.compile(r"(^test_)|(_test\.py$)")
 
 
-class _Finding(NamedTuple):
+class Finding(NamedTuple):
     path: str
     line: int
     col: int
@@ -228,8 +228,8 @@ def _is_mutable_value(value: ast.expr) -> bool:
             and value.func.id in MUTABLE_BUILDERS)
 
 
-def _check_b1(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_b1(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list[Finding]:
+    findings: list[Finding] = []
     bind_sites: dict[str, list[int]] = {}
     for stmt in module_stmts:
         for name in _binding_names(stmt):
@@ -241,31 +241,31 @@ def _check_b1(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list
             for target in targets:
                 if (isinstance(target, ast.Name) and target.id != "__all__"
                         and value is not None and _is_mutable_value(value)):
-                    findings.append(_Finding(path, stmt.lineno, stmt.col_offset + 1,
+                    findings.append(Finding(path, stmt.lineno, stmt.col_offset + 1,
                         "B1", f"module-level name '{target.id}' is bound to a mutable "
                               "value; bind an immutable one, move the state into an "
                               "object, or suppress with its reason if this is a "
                               "registration registry built at import (B1 carveout)"))
     for node in ast.walk(tree):
         if isinstance(node, ast.Global):
-            findings.append(_Finding(path, node.lineno, node.col_offset + 1,
+            findings.append(Finding(path, node.lineno, node.col_offset + 1,
                 "B1", f"'global {', '.join(node.names)}': state that changes after "
                       "start-up belongs to an object, not to a module"))
         if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
                 and node.func.id == "globals"):
-            findings.append(_Finding(path, node.lineno, node.col_offset + 1,
+            findings.append(Finding(path, node.lineno, node.col_offset + 1,
                 "B1", "globals() reaches into module state; move the state into an "
                       "object"))
     for name, sites in sorted(bind_sites.items()):
         if len(sites) > 1:
-            findings.append(_Finding(path, sites[1], 1, "B1",
+            findings.append(Finding(path, sites[1], 1, "B1",
                 f"module-level name '{name}' is bound {len(sites)} times "
                 f"(lines {', '.join(str(s) for s in sites)}); a constant is bound once"))
     return findings
 
 
-def _check_b2(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_b2(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list[Finding]:
+    findings: list[Finding] = []
 
     def work_call(call: ast.Call) -> bool:
         dotted = _dotted(call.func)
@@ -274,19 +274,19 @@ def _check_b2(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list
 
     for stmt in module_stmts:
         if isinstance(stmt, (ast.With, ast.AsyncWith)):
-            findings.append(_Finding(path, stmt.lineno, stmt.col_offset + 1,
+            findings.append(Finding(path, stmt.lineno, stmt.col_offset + 1,
                 "B2", "loading a module performs I/O: `with` at module scope; move "
                       "the work behind a call"))
         if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             continue  # a definition runs at import only in its decorator; bodies do not run
         for node in ast.walk(stmt):
             if isinstance(node, ast.Call) and work_call(node):
-                findings.append(_Finding(path, node.lineno, node.col_offset + 1,
+                findings.append(Finding(path, node.lineno, node.col_offset + 1,
                     "B2", f"loading a module calls '{_dotted(node.func)}'; I/O and "
                           "process work belong behind a call"))
         if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
             if not work_call(stmt.value):
-                findings.append(_Finding(path, stmt.lineno, stmt.col_offset + 1,
+                findings.append(Finding(path, stmt.lineno, stmt.col_offset + 1,
                     "B2", f"loading a module calls '{_dotted(stmt.value.func) or '<expr>'}'; "
                           "declarative registration binds a value -- bare calls are work"))
     return findings
@@ -305,8 +305,8 @@ def _docstrings(tree: ast.Module) -> list[tuple[int, str]]:
     return out
 
 
-def _check_a2(tree: ast.Module, path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_a2(tree: ast.Module, path: str) -> list[Finding]:
+    findings: list[Finding] = []
     for line, doc in _docstrings(tree):
         scrubbed = _URL_RE.sub(" ", doc)
         seen_spans: list[tuple[int, int]] = []
@@ -316,7 +316,7 @@ def _check_a2(tree: ast.Module, path: str) -> list[_Finding]:
                 if any(span[0] < s[1] and s[0] < span[1] for s in seen_spans):
                     continue
                 seen_spans.append(span)
-                findings.append(_Finding(path, line, 1, "A2",
+                findings.append(Finding(path, line, 1, "A2",
                     f"documentation names a location: {match.group(0)!r} -- point at "
                     "a public name instead"))
     return findings
@@ -333,27 +333,27 @@ def _is_swallow_body(body: list[ast.stmt]) -> bool:
     return bool(body)
 
 
-def _check_d2(tree: ast.Module, path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_d2(tree: ast.Module, path: str) -> list[Finding]:
+    findings: list[Finding] = []
     for node in ast.walk(tree):
         if not isinstance(node, (ast.Try, getattr(ast, "TryStar", ast.Try))):
             continue
         for handler in node.handlers:
             if handler.type is None:
-                findings.append(_Finding(path, handler.lineno, handler.col_offset + 1,
+                findings.append(Finding(path, handler.lineno, handler.col_offset + 1,
                     "D2", "bare 'except:' catches everything; name the exception"))
             elif _is_swallow_body(handler.body):
-                findings.append(_Finding(path, handler.lineno, handler.col_offset + 1,
+                findings.append(Finding(path, handler.lineno, handler.col_offset + 1,
                     "D2", "handler swallows the exception without acting on it or "
                           "reporting it"))
     return findings
 
 
-def _check_d3(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list[_Finding]:
+def _check_d3(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list[Finding]:
     basename = os.path.basename(path)
     if basename.startswith("_") or _TEST_FILE_RE.search(basename):
         return []
-    findings: list[_Finding] = []
+    findings: list[Finding] = []
     declared: list[str] | None = None
     for stmt in module_stmts:
         if (isinstance(stmt, ast.Assign) and len(stmt.targets) == 1
@@ -364,14 +364,14 @@ def _check_d3(tree: ast.Module, module_stmts: list[ast.stmt], path: str) -> list
                         if isinstance(e, ast.Constant)
                         and isinstance(e.value, str)]
     if declared is None:
-        findings.append(_Finding(path, 1, 1, "D3",
+        findings.append(Finding(path, 1, 1, "D3",
             "public module states no `__all__`; the surface must be declared, not "
             "inferred"))
         return findings
     bound = {name for stmt in module_stmts for name in _binding_names(stmt)}
     for name in declared:
         if name not in bound:
-            findings.append(_Finding(path, 1, 1, "D3",
+            findings.append(Finding(path, 1, 1, "D3",
                 f"'{name}' is listed in `__all__` but not defined"))
     return findings
 
@@ -400,8 +400,8 @@ def _iter_annotations(tree: ast.Module):
             yield node.annotation
 
 
-def _check_f1(tree: ast.Module, path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_f1(tree: ast.Module, path: str) -> list[Finding]:
+    findings: list[Finding] = []
     for func in _surface_funcs(tree):
         if func.name.startswith("_"):
             continue
@@ -421,43 +421,43 @@ def _check_f1(tree: ast.Module, path: str) -> list[_Finding]:
         if func.returns is None:
             missing.append("return")
         if missing:
-            findings.append(_Finding(path, func.lineno, func.col_offset + 1, "F1",
+            findings.append(Finding(path, func.lineno, func.col_offset + 1, "F1",
                 f"public function '{func.name}' is untyped: "
                 f"missing {', '.join(missing)}"))
     return findings
 
 
-def _check_f2(tree: ast.Module, path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_f2(tree: ast.Module, path: str) -> list[Finding]:
+    findings: list[Finding] = []
     for annotation in _iter_annotations(tree):
         for node in ast.walk(annotation):
             if (isinstance(node, ast.Name) and node.id == "Any") or (
                     isinstance(node, ast.Attribute) and node.attr == "Any"):
-                findings.append(_Finding(path, node.lineno, node.col_offset + 1,
+                findings.append(Finding(path, node.lineno, node.col_offset + 1,
                     "F2", "'Any' turns off checking here and everywhere it spreads; "
                           "annotate 'object' and narrow, or suppress at a named "
                           "carveout with its reason"))
     return findings
 
 
-def _check_f3(tree: ast.Module, path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_f3(tree: ast.Module, path: str) -> list[Finding]:
+    findings: list[Finding] = []
     for annotation in _iter_annotations(tree):
         if isinstance(annotation, ast.Subscript):
             continue
         name = _root_name(annotation)
         if name in BARE_GENERICS:
-            findings.append(_Finding(path, annotation.lineno, annotation.col_offset + 1,
+            findings.append(Finding(path, annotation.lineno, annotation.col_offset + 1,
                 "F3", f"bare '{name}' is dict[Any, Any] in different clothes; "
                       "parameterize the generic"))
     return findings
 
 
-def _check_f4(tree: ast.Module, path: str) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_f4(tree: ast.Module, path: str) -> list[Finding]:
+    findings: list[Finding] = []
 
     def flag(annotation: ast.expr, what: str, name: str) -> None:
-        findings.append(_Finding(path, annotation.lineno, annotation.col_offset + 1,
+        findings.append(Finding(path, annotation.lineno, annotation.col_offset + 1,
             "F4", f"{what} carries a {name} across a public boundary; give the value "
                   "named fields"))
 
@@ -488,9 +488,9 @@ def _check_f4(tree: ast.Module, path: str) -> list[_Finding]:
 
 # --- suppression and driver -------------------------------------------------
 
-def _read_suppressions(path: str) -> tuple[dict[int, str], list[_Finding]]:
+def _read_suppressions(path: str) -> tuple[dict[int, str], list[Finding]]:
     suppress: dict[int, str] = {}
-    findings: list[_Finding] = []
+    findings: list[Finding] = []
     try:
         with tokenize.open(path) as handle:
             tokens = list(tokenize.generate_tokens(handle.readline))
@@ -505,18 +505,18 @@ def _read_suppressions(path: str) -> tuple[dict[int, str], list[_Finding]]:
         if allowed:
             suppress[line] = allowed.group(1)
         elif blank:
-            findings.append(_Finding(path, line, token.start[1] + 1, "SUP",
+            findings.append(Finding(path, line, token.start[1] + 1, "SUP",
                 "suppression without a reason; write `# modularity: allow <reason>`"))
     return suppress, findings
 
 
-def _check_file(path: str) -> list[_Finding]:
+def _check_file(path: str) -> list[Finding]:
     try:
         with tokenize.open(path) as handle:
             source = handle.read()
         tree = ast.parse(source, filename=path)
     except (OSError, SyntaxError) as exc:
-        return [_Finding(path, 1, 1, "PARSE", f"cannot parse: {exc}")]
+        return [Finding(path, 1, 1, "PARSE", f"cannot parse: {exc}")]
     suppress, findings = _read_suppressions(path)
     module_stmts = _module_scope(tree)
     for check in (_check_b1, _check_b2, _check_a2, _check_d2):
@@ -557,6 +557,15 @@ def _print_plan() -> None:
         print(f"  {rule_id}  {why}")
 
 
+def run(paths: Sequence[str] | None = None) -> list[Finding]:
+    """Check Python files against the Tier 1 rules; returns findings sorted by location."""
+    given = list(paths) if paths else ["."]
+    findings: list[Finding] = []
+    for file_path in _iter_py_files(given):
+        findings.extend(_check_file(file_path))
+    return sorted(findings)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Check Python files against the Tier 1 rules; 1 on findings, else 0."""
     parser = argparse.ArgumentParser(
@@ -570,10 +579,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.plan:
         _print_plan()
         return 0
-    findings: list[_Finding] = []
-    for file_path in _iter_py_files(args.paths or ["."]):
-        findings.extend(_check_file(file_path))
-    for finding in sorted(findings):
+    findings = run(args.paths)
+    for finding in findings:
         print(f"{finding.path}:{finding.line}:{finding.col}: "
               f"[{finding.rule}] {finding.message}")
     return 1 if findings else 0

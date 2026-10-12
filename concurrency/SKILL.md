@@ -1,5 +1,5 @@
 ---
-name: threading
+name: concurrency
 description: >
   Language-neutral design principles for in-process concurrency -- threads,
   event loops, workers, cancellation, locks -- for code bases that are robust
@@ -27,11 +27,11 @@ or language feature that expresses them is a parameter.
 
 ## How to apply this
 
-- **Precedence.** These rules are normative and bind the project. The only thing that displaces them is an explicit exclusion by the
-  user in the project's AGENTS.md -- of this skill as a whole, or of a named
-  rule (C1--C5) -- and the excluded skill or rule then does not apply to the
-  project at all. Silence is not
-  an exclusion.
+- **Precedence.** These rules are normative and bind the project. The only 
+  thing that displaces them is an explicit exclusion by the user in the 
+  project's AGENTS.md -- of this skill as a whole, or of a named rule 
+  (C1--C5) -- and the excluded skill or rule then does not apply to the
+  project at all. Silence is not an exclusion.
 - **Scope of application.** These rules govern the code you are writing or
   editing. In a codebase that predates them they forbid *new* violations and
   authorize no repairs: never fix an existing violation as a side effect of

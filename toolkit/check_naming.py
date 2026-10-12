@@ -40,11 +40,11 @@ Not checked here:
 
 Usage:
 
-    python scripts/check_naming.py [path ...]     # default: current dir
-    python scripts/check_naming.py --plan
+    python TOOLKIT/check_naming.py [path ...]     # default: current dir
+    python TOOLKIT/check_naming.py --plan
 """
 
-__all__ = ["COVERAGE", "main"]
+__all__ = ["COVERAGE", "Finding", "run", "main"]
 
 import argparse
 import ast
@@ -52,7 +52,7 @@ import os
 import re
 import sys
 import tokenize
-from typing import NamedTuple
+from typing import NamedTuple, Sequence
 
 COVERAGE: tuple[tuple[str, str], ...] = (
     ("N1", "PEP 8 spellings bind: snake_case, CamelCase, ALL_CAPS"),
@@ -102,7 +102,7 @@ SUPPRESS_RE = re.compile(r"#\s*(?:naming|modularity):\s*allow\s+(\S.*?)\s*$")
 ALLOW_BLANK_RE = re.compile(r"#\s*(?:naming|modularity):\s*allow\s*$")
 
 
-class _Finding(NamedTuple):
+class Finding(NamedTuple):
     path: str
     line: int
     col: int
@@ -130,11 +130,11 @@ def _base_names(node: ast.ClassDef) -> list[str]:
     return out
 
 
-def _spelling(findings: list[_Finding], path: str, node: ast.AST, name: str,
+def _spelling(findings: list[Finding], path: str, node: ast.AST, name: str,
               pattern: re.Pattern[str], expected: str, kind: str) -> None:
     if pattern.match(name):
         return
-    findings.append(_Finding(path, node.lineno, node.col_offset + 1,
+    findings.append(Finding(path, node.lineno, node.col_offset + 1,
         "N2" if name.startswith("_") else "N1",
         f"{kind} '{name}' should be {expected}"))
 
@@ -151,7 +151,7 @@ def _constant_value(value: ast.expr | None) -> bool:
 
 # --- checks ----------------------------------------------------------------
 
-def _check_defs(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
+def _check_defs(tree: ast.Module, path: str, findings: list[Finding]) -> None:
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef,
                                  ast.ClassDef)):
@@ -160,7 +160,7 @@ def _check_defs(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
         if name in DUNDER_NAMES:
             continue
         if name.startswith("__") and name.endswith("__"):
-            findings.append(_Finding(path, node.lineno, node.col_offset + 1,
+            findings.append(Finding(path, node.lineno, node.col_offset + 1,
                 "N3", f"'{name}' invents a dunder name; those are the "
                       "language's reserved spelling"))
             continue
@@ -172,7 +172,7 @@ def _check_defs(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
                       "snake_case (_snake_case if private)", "function")
 
 
-def _check_variables(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
+def _check_variables(tree: ast.Module, path: str, findings: list[Finding]) -> None:
     module_targets: dict[tuple[int, int], ast.expr | None] = {}
     for stmt in tree.body:
         if isinstance(stmt, ast.Assign):
@@ -193,7 +193,7 @@ def _check_variables(tree: ast.Module, path: str, findings: list[_Finding]) -> N
             if name == "_" or name in DUNDER_NAMES:
                 continue
             if name in KEYWORD_EVASIONS:
-                findings.append(_Finding(path, name_node.lineno,
+                findings.append(Finding(path, name_node.lineno,
                     name_node.col_offset + 1, "N3",
                     f"'{name}' evades a keyword; take the trailing-underscore "
                     "spelling instead (class_, type_)"))
@@ -210,13 +210,13 @@ def _check_variables(tree: ast.Module, path: str, findings: list[_Finding]) -> N
                 _spelling(findings, path, name_node, name, NAME_RE,
                           "snake_case or ALL_CAPS", "name")
             if name in AMBIGUOUS:
-                findings.append(_Finding(path, name_node.lineno,
+                findings.append(Finding(path, name_node.lineno,
                     name_node.col_offset + 1, "N3",
                     f"'{name}' is not readable at a glance (l and 1, O and 0)"))
 
 
 
-def _check_n3(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
+def _check_n3(tree: ast.Module, path: str, findings: list[Finding]) -> None:
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             value = node.value
@@ -224,19 +224,19 @@ def _check_n3(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
                     ".", 1)[-1] in _TYPEVAR_BASES:
                 for target in node.targets:
                     if isinstance(target, ast.Name) and not CLASS_RE.match(target.id):
-                        findings.append(_Finding(path, target.lineno,
+                        findings.append(Finding(path, target.lineno,
                             target.col_offset + 1, "N3",
                             f"type variable '{target.id}' should be short "
                             "CapWords (T, AnyStr, Proto-suffixed)"))
         if isinstance(node, ast.ClassDef):
             if any(_EXCEPTION_BASE_RE.search(b) for b in _base_names(node)) \
                     and not node.name.endswith("Error"):
-                findings.append(_Finding(path, node.lineno, node.col_offset + 1,
+                findings.append(Finding(path, node.lineno, node.col_offset + 1,
                     "N3", f"exception class '{node.name}' should end in "
                           "'Error'"))
 
 
-def _check_n4(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
+def _check_n4(tree: ast.Module, path: str, findings: list[Finding]) -> None:
     for node in ast.walk(tree):
         if not isinstance(node, ast.ClassDef):
             continue
@@ -255,7 +255,7 @@ def _check_n4(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
             if name in MEMBER_EXEMPT or (name.startswith("__") and name.endswith("__")):
                 continue
             if not CONST_RE.match(name):
-                findings.append(_Finding(path, target.lineno,
+                findings.append(Finding(path, target.lineno,
                     target.col_offset + 1, "N4",
                     f"enum member '{name}' should be ALL_CAPS -- a constant "
                     "scoped to its class"))
@@ -263,9 +263,9 @@ def _check_n4(tree: ast.Module, path: str, findings: list[_Finding]) -> None:
 
 # --- suppression and driver -------------------------------------------------
 
-def _read_suppressions(path: str) -> tuple[dict[int, str], list[_Finding]]:
+def _read_suppressions(path: str) -> tuple[dict[int, str], list[Finding]]:
     suppress: dict[int, str] = {}
-    findings: list[_Finding] = []
+    findings: list[Finding] = []
     try:
         with tokenize.open(path) as handle:
             tokens = list(tokenize.generate_tokens(handle.readline))
@@ -278,24 +278,24 @@ def _read_suppressions(path: str) -> tuple[dict[int, str], list[_Finding]]:
         if allowed:
             suppress[token.start[0]] = allowed.group(1)
         elif ALLOW_BLANK_RE.search(token.string):
-            findings.append(_Finding(path, token.start[0], token.start[1] + 1,
+            findings.append(Finding(path, token.start[0], token.start[1] + 1,
                 "SUP", "suppression without a reason; write "
                        "`# naming: allow <reason>`"))
     return suppress, findings
 
 
-def _check_file(path: str) -> list[_Finding]:
+def _check_file(path: str) -> list[Finding]:
     try:
         with tokenize.open(path) as handle:
             source = handle.read()
         tree = ast.parse(source, filename=path)
     except (OSError, SyntaxError) as exc:
-        return [_Finding(path, 1, 1, "PARSE", f"cannot parse: {exc}")]
+        return [Finding(path, 1, 1, "PARSE", f"cannot parse: {exc}")]
     suppress, findings = _read_suppressions(path)
     stem = os.path.basename(path)[:-3]
     is_dunder_stem = stem.startswith("__") and stem.endswith("__")
     if not is_dunder_stem and not MODULE_RE.match(stem):
-        findings.append(_Finding(path, 1, 1, "N3",
+        findings.append(Finding(path, 1, 1, "N3",
             f"module name '{stem}' should be short all-lowercase "
             "(underscores where they improve readability)"))
     _check_defs(tree, path, findings)
@@ -306,8 +306,8 @@ def _check_file(path: str) -> list[_Finding]:
             if f.line not in suppress and (f.line - 1) not in suppress]
 
 
-def _check_packages(paths: list[str]) -> list[_Finding]:
-    findings: list[_Finding] = []
+def _check_packages(paths: list[str]) -> list[Finding]:
+    findings: list[Finding] = []
     for given in paths:
         roots = [given] if os.path.isdir(given) else [os.path.dirname(given)]
         for root in roots:
@@ -318,7 +318,7 @@ def _check_packages(paths: list[str]) -> list[_Finding]:
                 name = os.path.basename(dirpath)
                 pattern = PKG_PRIVATE_RE if name.startswith("_") else PKG_PUBLIC_RE
                 if not pattern.match(name):
-                    findings.append(_Finding(
+                    findings.append(Finding(
                         os.path.join(dirpath, "__init__.py"), 1, 1, "N3",
                         f"package name '{name}' should be all-lowercase with "
                         "no underscores (private packages keep the marker "
@@ -337,11 +337,30 @@ def _print_plan() -> None:
     print("  -- the trailing-underscore keyword rule beyond the common evasions")
 
 
+def run(paths: Sequence[str] | None = None) -> list[Finding]:
+    """Check Python names against the python-naming rules; returns findings sorted by location."""
+    given = list(paths) if paths else ["."]
+    findings: list[Finding] = []
+    for item in given:
+        if os.path.isfile(item):
+            if item.endswith(".py"):
+                findings.extend(_check_file(item))
+            continue
+        for dirpath, dirnames, names in os.walk(item):
+            dirnames[:] = sorted(d for d in dirnames
+                                 if not d.startswith(".") and d != "__pycache__")
+            for name in sorted(names):
+                if name.endswith(".py"):
+                    findings.extend(_check_file(os.path.join(dirpath, name)))
+    findings.extend(_check_packages(given))
+    return sorted(findings)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Check Python names against the python-naming rules; 1 on findings."""
     parser = argparse.ArgumentParser(
         prog="check_naming",
-        description="reference checker for the python-naming skill (N1--N4)")
+        description="reference checker for the python-naming rules (N1--N4)")
     parser.add_argument("paths", nargs="*", default=["."],
                         help="files or directories to check (default: current dir)")
     parser.add_argument("--plan", action="store_true",
@@ -350,20 +369,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.plan:
         _print_plan()
         return 0
-    findings: list[_Finding] = []
-    for given in args.paths or ["."]:
-        if os.path.isfile(given):
-            if given.endswith(".py"):
-                findings.extend(_check_file(given))
-            continue
-        for dirpath, dirnames, names in os.walk(given):
-            dirnames[:] = sorted(d for d in dirnames
-                                 if not d.startswith(".") and d != "__pycache__")
-            for name in sorted(names):
-                if name.endswith(".py"):
-                    findings.extend(_check_file(os.path.join(dirpath, name)))
-    findings.extend(_check_packages(args.paths or ["."]))
-    for finding in sorted(findings):
+    findings = run(args.paths)
+    for finding in findings:
         print(f"{finding.path}:{finding.line}:{finding.col}: "
               f"[{finding.rule}] {finding.message}")
     return 1 if findings else 0

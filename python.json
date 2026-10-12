@@ -1,0 +1,12 @@
+{
+    "skills": [
+        "ponytail-adapted/SKILL.md",
+        "modularity/SKILL.md",
+        "concurrency/SKILL.md",
+        "python-modularity/SKILL.md",
+        "python-naming/SKILL.md"
+    ],
+    "tools": [
+        "toolkit/python.py"
+    ]
+}
