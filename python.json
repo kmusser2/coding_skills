@@ -1,4 +1,5 @@
 {
+    "description": "best-practices for python development in large codebases",
     "skills": [
         "ponytail-adapted/SKILL.md",
         "modularity/SKILL.md",
