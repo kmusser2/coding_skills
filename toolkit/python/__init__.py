@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # TYPE: TOOLKIT
 # keywords: |python|modularity|naming|check|rules|enforce|style|compliance|skill|
-# examples: |import python; python.check_modularity()|import python; python.check_naming('src')|import python; python.plan()|
+# examples: |import $name; $name.check_modularity()|import $name; $name.check_naming('src')|import $name; $name.plan()|
 # modularity: allow the docstring names the module and states output patterns to give the tool's contract; those are names and pattern texts, not location references (A1)
 """python.py - enforce the modularity and naming coding skills
 
 Python API (importable from any python_eval call):
-  import python
-  python.check_modularity()        -> findings for the modularity family rules
-  python.check_naming()            -> findings for the naming rules
-  python.check_all()               -> both checkers, merged and sorted
-  python.plan()                    -> what is checked, and what is judgement-only
-  python.format_findings(findings) -> "path:line:col: [RULE] message" lines
-  python.ok(findings)              -> True when a run is clean
+  import $name
+  $name.check_modularity()        -> findings for the modularity family rules
+  $name.check_naming()            -> findings for the naming rules
+  $name.check_all()               -> both checkers, merged and sorted
+  $name.plan()                    -> what is checked, and what is judgement-only
+  $name.format_findings(findings) -> "path:line:col: [RULE] message" lines
+  $name.ok(findings)              -> True when a run is clean
 
 A Finding is (path, line, col, rule, message); the rule id names a rule in
 the companion skills, which own the claim. A clean run is a verdict on the
