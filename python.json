@@ -9,12 +9,11 @@
     ],
     "tools": [
         {
-            "init": "toolkit/python/__init__.py",
-            "files": [
-                "toolkit/python/__init__.py",
+            "tool": "toolkit/python/__init__.py",
+            "requires": [
                 "toolkit/python/check_modularity.py",
-                "toolkit/python/check_naming.py"],
-            "root": true
+                "toolkit/python/check_naming.py"
+            ]
         }
     ]
 }
