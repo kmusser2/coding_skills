@@ -1,5 +1,5 @@
 ---
-name: modular-python
+name: python-modularity
 description: >
   Python typing rules for modular design -- annotations, `Any`, generics,
   value shapes -- the Python expression of the language-independent modularity

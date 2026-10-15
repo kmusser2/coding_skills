@@ -1,0 +1,8 @@
+{
+    "description": "subagent plan review",
+    "skills": [
+        "review-independence/SKILL.md",
+        "review-plan/SKILL.md"
+    ],
+    "tools": []
+}

@@ -1,0 +1,7 @@
+{
+    "description": "parent-agent orchestration of the review workflow",
+    "skills": [
+        "agent-orchestration/SKILL.md"
+    ],
+    "tools": []
+}

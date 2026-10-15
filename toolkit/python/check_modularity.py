@@ -16,9 +16,11 @@ reasoned about".
 
 Design contract
 ---------------
-- Each check carries the id of the rule it enforces. A meta-test asserts that
-  the implemented ids match the rules marked *Check:* in the skill docs (A1:
-  this file is a derived owner, never a second author).
+- Each check carries the id of the rule it enforces. Machine-checks are used
+  wherever a rule is decidable in code; rules that need judgement are left to
+  the reviewer -- some rules are simply not machine checkable. (A meta-test
+  pinning these ids to the skill docs is not yet implemented; until it is, keep
+  them in step by hand.)
 - Stdlib only, single file, no dependencies. Tier 2 config will be read from
   `[tool.check_modularity]` in the project's pyproject file via `tomllib`.
 - Suppression: a `# modularity: allow <reason>` comment on the flagged line or
@@ -29,7 +31,7 @@ Tier 1 (implemented below): decidable by AST/regex, low false-positive rate.
 Tier 2 (planned): mechanizable but needs project config or tolerates heuristic
 noise -- warning-grade, suppression-friendly.
 Tier 3 (never checked): judgement only; the *Test:* question in the rule is
-the instrument. Listed so the meta-test knows what to expect.
+the instrument. Listed so the scope is explicit.
 
 Scope notes for Tier 1:
 - A2's check covers the locations half of the rule only.
